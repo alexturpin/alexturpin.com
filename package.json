@@ -1,0 +1,8 @@
+{
+  "prettier": {
+    "htmlWhitespaceSensitivity": "ignore"
+  },
+  "dependencies": {
+    "prettier": "^2.5.1"
+  }
+}
