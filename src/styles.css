@@ -35,10 +35,14 @@ a:hover {
   background: var(--highlight-wash);
 }
 
+/* The menu and the reading column sit together, centred on wide screens */
+
 .site {
   display: flex;
   flex-wrap: wrap;
+  max-width: 1000px;
   min-height: 100vh;
+  margin: 0 auto;
 }
 
 /* Left menu */
@@ -102,7 +106,7 @@ a:hover {
 .content {
   flex: 999 1 560px;
   min-width: 0;
-  padding: 96px 24px;
+  padding: 96px 24px 96px 72px;
 }
 
 .column {
@@ -110,7 +114,6 @@ a:hover {
   flex-direction: column;
   gap: 56px;
   max-width: 620px;
-  margin: 0 auto;
 }
 
 .column a {
