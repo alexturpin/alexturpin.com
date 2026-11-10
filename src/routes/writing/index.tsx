@@ -11,7 +11,7 @@ export const Route = createFileRoute("/writing/")({
 function Writing() {
   return (
     <section className="intro">
-      <h1>Writing</h1>
+      {posts.length > 0 && <h1>Writing</h1>}
       {posts.length > 0 ? <PostList /> : <p className="muted">Nothing published yet.</p>}
     </section>
   );

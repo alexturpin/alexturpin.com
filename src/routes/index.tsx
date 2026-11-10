@@ -6,6 +6,8 @@ import { posts } from "#/writing/posts";
 export const Route = createFileRoute("/")({ component: Home });
 
 function Home() {
+  const yearsOfExperience = new Date().getFullYear() - 2011;
+
   return (
     <>
       <section className="intro">
@@ -18,12 +20,15 @@ function Home() {
         />
         <h1>Hey, I'm Alex.</h1>
         <p>
-          I'm a software developer from Canada. I have a passion for using modern web technology to
-          build great products with delightful user experiences.
+          I'm a software developer from Canada. I've been writing software professionally for{" "}
+          {yearsOfExperience} years.
         </p>
         <p>
-          I'm currently channeling this passion into building{" "}
-          <a href="https://bettertax.ca/">better tax software</a> for Canadians.
+          These days, I'm building{" "}
+          <a href="https://bettertax.ca/" target="_blank" rel="noopener noreferrer">
+            better tax software
+          </a>{" "}
+          for Canadians.
         </p>
       </section>
       {posts.length > 0 && (

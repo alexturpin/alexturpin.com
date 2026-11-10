@@ -1,6 +1,7 @@
 import { HeadContent, Link, Scripts, createRootRouteWithContext } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { posts } from "#/writing/posts";
 
 import type { QueryClient } from "@tanstack/react-query";
 
@@ -13,9 +14,6 @@ const work = [{ label: "Better Tax", href: "https://bettertax.ca/" }];
 const elsewhere = [
   { label: "GitHub", href: "https://github.com/alexturpin" },
   { label: "LinkedIn", href: "https://www.linkedin.com/in/alexturpin/" },
-  { label: "Bluesky", href: "https://bsky.app/profile/alexturpin.com" },
-  { label: "Instagram", href: "https://instagram.com/alexturpin.ca" },
-  { label: "Email", href: "mailto:contact@alexturpin.com" },
 ];
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
@@ -76,9 +74,11 @@ function SiteMenu() {
         <Link to="/" className="menu-link" activeOptions={{ exact: true }}>
           Home
         </Link>
-        <Link to="/writing" className="menu-link">
-          Writing
-        </Link>
+        {posts.length > 0 && (
+          <Link to="/writing" className="menu-link">
+            Writing
+          </Link>
+        )}
       </div>
       <MenuGroup heading="Work" links={work} />
       <MenuGroup heading="Elsewhere" links={elsewhere} />
@@ -97,7 +97,13 @@ function MenuGroup({
     <div className="menu-group">
       <div className="menu-heading">{heading}</div>
       {links.map((link) => (
-        <a key={link.href} href={link.href} className="menu-link">
+        <a
+          key={link.href}
+          href={link.href}
+          className="menu-link"
+          target={link.href.startsWith("https://") ? "_blank" : undefined}
+          rel={link.href.startsWith("https://") ? "noopener noreferrer" : undefined}
+        >
           <span>{link.label}</span>
           <span className="menu-arrow" aria-hidden="true">
             ↗
