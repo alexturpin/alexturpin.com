@@ -2,7 +2,7 @@ import { readFile, readdir, rename, writeFile } from "node:fs/promises";
 
 import registry from "../atproto.json" with { type: "json" };
 import { recordUri } from "../src/writing/atproto.ts";
-import { prepareRecords } from "./atproto-records.ts";
+import { assertRemoteDocumentsIncluded, prepareRecords } from "./atproto-records.ts";
 
 const mode = process.argv[2];
 if (mode !== "preview" && mode !== "publish") {
@@ -58,6 +58,28 @@ if (mode === "preview") {
   if (session.did !== registry.did || typeof session.accessJwt !== "string") {
     throw new Error("Authenticated account does not match atproto.json");
   }
+  // A fresh CI checkout has no publication flags from previous builds.
+  // Check remote records before writing anything to catch removals and slug changes.
+  const includedKeys = new Set(writes.slice(1).map(({ identity }) => identity.rkey));
+  let cursor: string | undefined;
+  do {
+    const query = new URLSearchParams({
+      repo: registry.did,
+      collection: "site.standard.document",
+      limit: "100",
+    });
+    if (cursor) query.set("cursor", cursor);
+    const page = await request(new URL(`/xrpc/com.atproto.repo.listRecords?${query}`, base));
+    if (!Array.isArray(page.records)) throw new Error("Invalid record listing");
+    const records = page.records.map((record: unknown) => {
+      if (!isObject(record) || typeof record.uri !== "string" || !isObject(record.value)) {
+        throw new Error("Invalid remote document");
+      }
+      return { uri: record.uri, value: record.value };
+    });
+    assertRemoteDocumentsIncluded(records, registry, includedKeys);
+    cursor = typeof page.cursor === "string" ? page.cursor : undefined;
+  } while (cursor);
   for (const { identity, record } of writes) {
     const collection = String(record.$type);
     const query = new URLSearchParams({ repo: registry.did, collection, rkey: identity.rkey });
@@ -108,7 +130,7 @@ if (mode === "preview") {
     console.log(`Published: ${result.uri}`);
   }
   console.log(
-    "Commit atproto.json, then rebuild and deploy the website to expose verification links.",
+    "Publication state saved for this build. Rebuild and deploy the website to expose verification links.",
   );
 }
 

@@ -29,8 +29,10 @@ account was migrated on November 10, 2026, preserving its DID.
 `pnpm deploy:site` and `pnpm deploy:pds` are separate, explicit release commands.
 The PDS has separate production secrets. Deploying or migrating requires separate authorization.
 
-The blog still publishes to the existing account's current PDS. The publishing
-commands remain available at the root (`pnpm atproto:preview` and
-`pnpm atproto:publish`); credentials belong in `apps/site/.env.atproto`.
+Push dated Markdown articles to `main` to publish them to the current PDS and
+deploy the website through Cloudflare Builds. Drafts and preview builds do not
+publish. Manual publishing commands remain available at the root
+(`pnpm atproto:preview` and `pnpm atproto:publish`); local credentials belong in
+`apps/site/.env.atproto`, while CI uses a Cloudflare build secret.
 
 See [site documentation](apps/site/README.md) and [PDS documentation](apps/pds/README.md).

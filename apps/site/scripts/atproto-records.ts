@@ -1,17 +1,13 @@
-import { randomInt } from "node:crypto";
+import { createHash } from "node:crypto";
 
 import { publication, recordUri } from "../src/writing/atproto.ts";
 import { parsePost } from "./parse-post.ts";
 
 import type { PublicationRegistry, RecordIdentity } from "../src/writing/atproto.ts";
 
-let lastTimestamp = 0n;
-const clockId = BigInt(randomInt(1024));
-
-export function newTid() {
-  const now = BigInt(Date.now()) * 1000n;
-  lastTimestamp = now > lastTimestamp ? now : lastTimestamp + 1n;
-  let value = (lastTimestamp << 10n) | clockId;
+// Stable across clean CI checkouts; existing registry overrides remain authoritative.
+export function stableRecordKey(identity: string) {
+  let value = createHash("sha256").update(identity).digest().readBigUInt64BE() & ((1n << 63n) - 1n);
   const alphabet = "234567abcdefghijklmnopqrstuvwxyz";
   let result = "";
   for (let i = 0; i < 13; i++) {
@@ -28,7 +24,7 @@ export function prepareRecords(
   if (!/^did:plc:[a-z2-7]{24}$/.test(state.did)) {
     throw new Error("Set your did:plc identity in atproto.json before preparing records.");
   }
-  state.publication.rkey ||= newTid();
+  state.publication.rkey ||= stableRecordKey(`${state.did}/publication/${publication.url}`);
   const site = recordUri(state.did, publication.$type, state.publication.rkey);
   const writes: Array<{ identity: RecordIdentity; record: Record<string, unknown> }> = [
     { identity: state.publication, record: publication },
@@ -39,7 +35,10 @@ export function prepareRecords(
     if (!post.date) continue;
     const publishedAt = new Date(`${post.date}T00:00:00Z`).toISOString();
     if (!publishedAt.startsWith(post.date)) throw new Error(`${slug}: invalid calendar date`);
-    const identity = (state.documents[slug] ??= { rkey: newTid(), published: false });
+    const identity = (state.documents[slug] ??= {
+      rkey: stableRecordKey(`${site}/${slug}`),
+      published: false,
+    });
     included.add(slug);
     writes.push({
       identity,
@@ -79,4 +78,19 @@ export function prepareRecords(
     throw new Error("Duplicate record keys in atproto.json");
   }
   return writes;
+}
+
+export function assertRemoteDocumentsIncluded(
+  records: Array<{ uri: string; value: Record<string, unknown> }>,
+  state: PublicationRegistry,
+  includedKeys: Set<string>,
+) {
+  const site = recordUri(state.did, publication.$type, state.publication.rkey);
+  for (const record of records) {
+    if (record.value.site === site && !includedKeys.has(record.uri.split("/").at(-1)!)) {
+      throw new Error(
+        `Previously published article is missing or a draft: ${record.uri}. Restore it or explicitly withdraw it; nothing is deleted automatically.`,
+      );
+    }
+  }
 }

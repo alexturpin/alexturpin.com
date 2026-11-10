@@ -54,47 +54,63 @@ DID. The publishing command discovers the current PDS from that DID, so migratin
 the account (for example to Cirrus on Workers) does not require changing this code.
 Publication name and description live in `src/writing/atproto.ts`.
 
-```sh
-pnpm atproto:preview
-```
+### Automatic publishing on push
 
-This prints the exact proposed records, excludes drafts, and saves stable record
-keys in `atproto.json`. It makes no network requests. Commit that file: never reset
-its IDs after publishing. For a slug rename, move the existing entry to the new
-slug to retain the article's identity. Do not run publishing commands concurrently.
+Add or edit Markdown in `content/writing/`, set its `date` when ready, and push to
+`main`. Cloudflare Builds validates the site, publishes the dated articles to the
+account's current PDS, rebuilds the site with verification links, and deploys it.
+Drafts (no date) are excluded. Ordinary builds, development, and preview branches
+do not publish. There are no automatic Bluesky announcements.
 
-To publish, put an app password (not your main password) in the gitignored
-`.env.atproto` file:
+Cloudflare's production build configuration is:
+
+- Root directory: `apps/site`
+- Build command: `pnpm run validate`
+- Deploy command: `pnpm run deploy:cloudflare`
+- Build secret: `ATPROTO_APP_PASSWORD`, a dedicated Cirrus app password
+- Existing `NODE_VERSION` and `PNPM_VERSION` build variables match the pinned versions.
+
+The deploy script requires Cloudflare's `WORKERS_CI=1`, branch `main`, and a commit
+SHA matching the current remote `main` before publishing and again before deploying.
+Old build retries therefore fail rather than intentionally rolling articles back.
+Keep production releases sequential; a remote-head check cannot lock Git against
+a push that arrives during publishing. Record updates use CID conflict checks.
+
+New article IDs are deterministic from the publication and filename, so fresh
+checkouts and retries use the same records. Existing IDs in `atproto.json` take
+precedence. CI updates publication flags in its checkout for the final build;
+it does not need to commit those generated changes back to Git.
+
+Treat published filenames as stable URLs. To rename one while preserving its
+network identity, first run `pnpm atproto:preview` with the old filename, then move
+its registry entry to the new slug and commit the registry with the renamed file.
+The publisher checks remote articles too: removing a published article or making
+it a draft fails the release until you restore it or explicitly withdraw its PDS
+record. No remote records are deleted automatically.
+
+PDS publishing and website deployment are separate operations. If publishing
+succeeds but deployment fails, retry the latest build: unchanged records are
+skipped, stable IDs prevent duplicates, and the site completes its verification
+links. A partially published run can likewise be retried. Until deployment
+succeeds, the new article or its verification links may not be live on the site.
+
+### Manual preview and publishing
+
+`pnpm atproto:preview` prints proposed records without network requests and saves
+IDs in `atproto.json`. For manual publishing, save an app password in the gitignored
+`apps/site/.env.atproto` file (relative to the workspace root):
 
 ```dotenv
 ATPROTO_APP_PASSWORD=your-app-password
 ```
 
-Then explicitly run:
+Then run `pnpm atproto:publish` and rebuild/deploy the site. Do not run manual
+publishing concurrently with Cloudflare releases. Keep credentials out of Git;
+the Cloudflare credential is a build secret, not a Worker runtime binding.
 
-```sh
-pnpm atproto:publish
-pnpm run validate
-```
-
-Publishing writes to your actual account. It creates or updates records, skips
-unchanged records, checks the existing CID before overwriting, and saves progress
-after each successful write. Failed runs can be retried; a conflict requires
-reviewing the remote changes first. A long run may require retrying after session
-expiry. Build and development never publish anything.
-
-After publishing, commit the updated registry and deploy the website through the
-normal release process. The site then serves
-`/.well-known/site.standard.publication` and each published article gets a
-`site.standard.document` verification link in its HTML head. Before publication,
-the endpoint returns 404 and no verification links are advertised. Until the
-updated site is deployed, network verification will not be complete.
-
-Removing a previously published article or changing it back to a draft stops
-synchronization. There is deliberately no automatic remote deletion: explicitly
-remove the remote record and its registry entry when withdrawing an article.
-Backups or copies held by other services may remain. This integration does not
-post Bluesky announcements, add comments, or migrate the account.
+The deployed site serves `/.well-known/site.standard.publication` and includes a
+`site.standard.document` verification link in each published article's HTML head.
+Readers can verify the relationship between the website and the PDS records.
 
 References: [Standard.site](https://standard.site/docs/quick-start/),
 [Markdown content format](https://markpub.at/), and

@@ -19,7 +19,8 @@
     "deploy": "pnpm run validate && wrangler deploy",
     "atproto:preview": "node scripts/atproto.ts preview",
     "atproto:publish": "node --env-file-if-exists=.env.atproto scripts/atproto.ts publish",
-    "test": "node --test scripts/*.test.ts"
+    "test": "node --test scripts/*.test.ts",
+    "deploy:cloudflare": "node scripts/deploy-cloudflare.ts"
   },
   "dependencies": {
     "@fontsource-variable/source-serif-4": "^5.3.1",

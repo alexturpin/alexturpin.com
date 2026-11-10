@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { documentUri, publicationUri } from "../src/writing/atproto.ts";
-import { prepareRecords } from "./atproto-records.ts";
+import { assertRemoteDocumentsIncluded, prepareRecords } from "./atproto-records.ts";
 
 import type { PublicationRegistry } from "../src/writing/atproto.ts";
 
@@ -83,4 +83,45 @@ await test("invalid dates and duplicate IDs are rejected before publishing", () 
   prepareRecords([article], registry);
   registry.documents.hello.rkey = registry.publication.rkey;
   assert.throws(() => prepareRecords([article], registry), /Duplicate record keys/);
+});
+
+await test("fresh CI checkouts produce the same article identities across edits", () => {
+  const first = state();
+  const second = state();
+  prepareRecords([article], first);
+  prepareRecords([{ ...article, source: article.source.replace("Hello", "Changed") }], second);
+  assert.deepEqual(first, second);
+  prepareRecords([{ ...article, slug: "different" }], second);
+  assert.notEqual(first.documents.hello.rkey, second.documents.different.rkey);
+});
+
+await test("existing record keys survive the switch to automatic publishing", () => {
+  const registry = state();
+  registry.publication.rkey = "3mzyhw7ejm2hj";
+  registry.documents.hello = { rkey: "3mutd3nu2x72v", published: true };
+  prepareRecords([article], registry);
+  assert.equal(registry.publication.rkey, "3mzyhw7ejm2hj");
+  assert.equal(registry.documents.hello.rkey, "3mutd3nu2x72v");
+});
+
+await test("remote history catches removed articles even with a clean local registry", () => {
+  const registry = state();
+  prepareRecords([article], registry);
+  const uri = `at://${registry.did}/site.standard.document/${registry.documents.hello.rkey}`;
+  const site = `at://${registry.did}/site.standard.publication/${registry.publication.rkey}`;
+  const remote = [{ uri, value: { site } }];
+  assert.throws(
+    () => assertRemoteDocumentsIncluded(remote, registry, new Set()),
+    /missing or a draft/,
+  );
+  assert.doesNotThrow(() =>
+    assertRemoteDocumentsIncluded(remote, registry, new Set([registry.documents.hello.rkey])),
+  );
+  assert.doesNotThrow(() =>
+    assertRemoteDocumentsIncluded(
+      [{ uri, value: { site: "another-publication" } }],
+      registry,
+      new Set(),
+    ),
+  );
 });
