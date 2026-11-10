@@ -31,6 +31,13 @@ Exclude request-dependent pages from prerendering in the TanStack Start plugin
 configuration so they render in the Worker at request time. Prerendered pages
 are served as assets before falling back to the Worker.
 
+## Writing
+
+Each Markdown file in `content/writing/` is a post, served at `/writing/<file name>`.
+The frontmatter takes a `title` and a publication `date` (`YYYY-MM-DD`). A post
+without a date is a draft: it shows in `pnpm dev` and is left out of the build.
+`markdown-posts.ts` compiles the files to HTML at build time.
+
 Run `pnpm run cf:typegen` after changing Wrangler bindings or compatibility settings.
 
 `pnpm run deploy` validates and uploads the Worker and assets using the `personal`
