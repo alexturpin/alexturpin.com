@@ -25,7 +25,7 @@ function Home() {
         </p>
         <p>
           These days, I'm building{" "}
-          <a href="https://bettertax.ca/" target="_blank" rel="noopener noreferrer">
+          <a href="https://www.bettertax.ca/" target="_blank" rel="noopener noreferrer">
             better tax software
           </a>{" "}
           for Canadians.
