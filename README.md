@@ -23,11 +23,11 @@ Each app owns its Wrangler configuration, generated types, secrets, and local
 storage. Put site environment files in `apps/site` and PDS secrets in
 `apps/pds/.dev.vars`. Package scripts are authentication-neutral so Cloudflare Builds can use its API
 token. For local Wrangler commands, append `--profile personal` explicitly.
-There are no configured production PDS domains or migrated accounts.
+The PDS hosts `@alexturpin.com` at `pds.alexturpin.com`. The existing Bluesky
+account was migrated on November 10, 2026, preserving its DID.
 
 `pnpm deploy:site` and `pnpm deploy:pds` are separate, explicit release commands.
-The PDS needs production identity, hostname, secrets, and resource configuration
-before deployment. Deploying or migrating requires separate authorization.
+The PDS has separate production secrets. Deploying or migrating requires separate authorization.
 
 The blog still publishes to the existing account's current PDS. The publishing
 commands remain available at the root (`pnpm atproto:preview` and

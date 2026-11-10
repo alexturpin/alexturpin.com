@@ -1,6 +1,8 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "alexturpin-pds",
+  "account_id": "d85a0daa3e2452f1bcc7ba56d59ceb5e",
+  "routes": [{ "pattern": "pds.alexturpin.com", "custom_domain": true }],
   "main": "src/index.ts",
   "compatibility_date": "2026-11-10",
   "compatibility_flags": ["nodejs_compat"],
@@ -12,10 +14,10 @@
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["AccountDurableObject"] }],
   "r2_buckets": [{ "binding": "BLOBS", "bucket_name": "alexturpin-pds-blobs" }],
   "vars": {
-    // Local test identity only; production identity and hostname are not configured.
-    "DID": "did:web:localhost",
-    "HANDLE": "pds.example.test",
-    "PDS_HOSTNAME": "localhost:8787",
+    // New storage starts inactive; the migrated production account is already active.
+    "DID": "did:plc:kknhrqqcdsrn3zkmtxpah4u6",
+    "HANDLE": "alexturpin.com",
+    "PDS_HOSTNAME": "pds.alexturpin.com",
     "INITIAL_ACTIVE": "false",
   },
   "observability": {

@@ -1,8 +1,9 @@
 # Personal Data Server
 
 This app wraps `@getcirrus/pds` as its own Worker, with an account Durable Object
-and R2 blob storage. Cirrus is pinned to 0.18.0 (beta). This version does not include the optional Spaces alpha. This repository contains configuration only; no Cloudflare resources
-have been provisioned and no account has been migrated.
+and R2 blob storage. Cirrus is pinned to 0.18.0 (beta). This version does not include the optional Spaces alpha. Production is configured for `pds.alexturpin.com` with Alex’s existing DID.
+Migration completed on November 10, 2026: Cirrus is active and the old Bluesky
+PDS copy is deactivated. The existing DID, records, media, and preferences were preserved.
 
 Run `pnpm build` here for an offline Wrangler bundle, or `pnpm validate` at the
 workspace root to check both apps. Run `pnpm cf:typegen` here after binding changes.
@@ -20,16 +21,23 @@ Run `pnpm dev:pds` from the root. Wrangler simulates
 the Durable Object and R2 locally on port 8787. The local account starts inactive
 and is not registered with the public network. Local setup does not create a public identity.
 
-## Future production setup
+## Production
 
-The intended hostname is `pds.alexturpin.com`, but it is not bound in this config.
-Before deployment, configure that hostname, the chosen identity, production
-secrets, account activation, relay settings, and Cloudflare resources. Account
-migration is a separate operation and is not part of install, build, or dev.
+The Worker is `alexturpin-pds`, with R2 bucket `alexturpin-pds-blobs` and its own
+account Durable Object. `INITIAL_ACTIVE` remains `false` so newly created account
+storage starts inactive. The migrated account is already active; this setting
+does not deactivate it on redeployment.
 
-Avoid running Cirrus's interactive `pds init` as a local setup command: it also
-offers Cloudflare authentication and production configuration. Follow the
-[Cirrus documentation](https://cirrus.earth/) when production setup is authorized.
+Production credentials are independent of `.dev.vars`. The private, gitignored
+`.env.pds-production-backup.json` contains the signing key and generated account
+password; copy it to secure backup storage. `.env.pds-production.json` contains
+only the secrets accepted by Wrangler's `--secrets-file` option. Never commit
+these files or use the disposable local credentials for production.
+
+Local development overrides DID, handle, and hostname in `.dev.vars` and still
+uses the test identity. Worker deployments do not change the public PLC identity
+record. Account migration, identity rotation, and activation are separate,
+explicitly authorized operations. See the [Cirrus migration guide](https://cirrus.earth/guides/migrate-from-bluesky/).
 
 ## Dependency pin
 

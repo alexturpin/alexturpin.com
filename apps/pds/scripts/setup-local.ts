@@ -18,6 +18,10 @@ if (!exists) {
   const key = await Secp256k1Keypair.create({ exportable: true });
   const password = randomBytes(24).toString("hex");
   const values = {
+    DID: "did:web:localhost",
+    HANDLE: "pds.example.test",
+    PDS_HOSTNAME: "localhost:8787",
+    INITIAL_ACTIVE: "false",
     AUTH_TOKEN: randomBytes(32).toString("hex"),
     SIGNING_KEY: Buffer.from(await key.export()).toString("hex"),
     SIGNING_KEY_PUBLIC: key.did().replace("did:key:", ""),
