@@ -1,0 +1,11 @@
+node_modules/
+.pnpm-store/
+.DS_Store
+dist/
+.tanstack/
+.wrangler/
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
