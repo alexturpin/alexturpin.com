@@ -1,45 +1,36 @@
 # alexturpin.com
 
-Personal site built with React, TanStack Start and Router, and plain CSS, deployed
-as a Cloudflare Worker. Static pages are prerendered; the Worker supports SSR,
-server functions, and server routes. TanStack Query is wired into the router.
+A pnpm workspace with two independently deployed Cloudflare Workers. No task
+runner or shared package layer: pnpm filters and recursive scripts are sufficient.
 
-## Local development
+| App         | Purpose                                  | Local command              |
+| ----------- | ---------------------------------------- | -------------------------- |
+| `apps/site` | TanStack website and Markdown publishing | `pnpm dev` (port 3000)     |
+| `apps/pds`  | Cirrus Personal Data Server              | `pnpm dev:pds` (port 8787) |
 
-Use the Node version in `.node-version` and the pnpm version in `package.json`.
+Use the Node version in `.node-version` and pnpm version in `package.json`.
 
 ```sh
 pnpm install --frozen-lockfile
-pnpm dev
+pnpm validate
 ```
 
-The dev server listens at http://localhost:3000. Edit `src/routes/index.tsx` for the homepage.
+`pnpm build`, `pnpm lint`, `pnpm typecheck`, and `pnpm test` run across the apps.
+`pnpm format` formats the workspace. `pnpm preview` previews the built website.
+The PDS build is a Wrangler dry run: it bundles locally without uploading anything.
 
-```sh
-pnpm run validate
-pnpm run preview
-```
+Each app owns its Wrangler configuration, generated types, secrets, and local
+storage. Put site environment files in `apps/site` and PDS secrets in
+`apps/pds/.dev.vars`. Package scripts are authentication-neutral so Cloudflare Builds can use its API
+token. For local Wrangler commands, append `--profile personal` explicitly.
+There are no configured production PDS domains or migrated accounts.
 
-Validation checks formatting, lint and types, then prerenders the site. The
-preview command runs the built Worker and assets locally through the Cloudflare
-Vite plugin. The build generates the deployment configuration in `dist/server/`
-and points Wrangler to it through `.wrangler/deploy/config.json`.
+`pnpm deploy:site` and `pnpm deploy:pds` are separate, explicit release commands.
+The PDS needs production identity, hostname, secrets, and resource configuration
+before deployment. Deploying or migrating requires separate authorization.
 
-Add pages under `src/routes/`. The build discovers and prerenders static routes.
-Configure explicit paths for parameterized routes when adding them.
-Exclude request-dependent pages from prerendering in the TanStack Start plugin
-configuration so they render in the Worker at request time. Prerendered pages
-are served as assets before falling back to the Worker.
+The blog still publishes to the existing account's current PDS. The publishing
+commands remain available at the root (`pnpm atproto:preview` and
+`pnpm atproto:publish`); credentials belong in `apps/site/.env.atproto`.
 
-## Writing
-
-Each Markdown file in `content/writing/` is a post, served at `/writing/<file name>`.
-The frontmatter takes a `title` and a publication `date` (`YYYY-MM-DD`). A post
-without a date is a draft: it shows in `pnpm dev` and is left out of the build.
-`markdown-posts.ts` compiles the files to HTML at build time.
-
-Run `pnpm run cf:typegen` after changing Wrangler bindings or compatibility settings.
-
-`pnpm run deploy` validates and uploads the Worker and assets using the `personal`
-Wrangler profile. The site's production hostname and account configuration are
-set when release work is authorized.
+See [site documentation](apps/site/README.md) and [PDS documentation](apps/pds/README.md).

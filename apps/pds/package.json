@@ -1,0 +1,27 @@
+{
+  "name": "@alexturpin/pds",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/setup-local.ts && wrangler dev --local --port 8787",
+    "build": "wrangler deploy --dry-run --outdir dist",
+    "typecheck": "tsc --noEmit",
+    "cf:typegen": "wrangler types",
+    "lint": "oxlint --type-aware --deny-warnings .",
+    "lint:fix": "oxlint --type-aware --fix .",
+    "validate": "pnpm run lint && pnpm run typecheck && pnpm run build",
+    "deploy": "pnpm run validate && wrangler deploy"
+  },
+  "dependencies": {
+    "@getcirrus/pds": "0.18.0"
+  },
+  "devDependencies": {
+    "@atproto/crypto": "0.4.5",
+    "@types/node": "latest",
+    "bcryptjs": "3.0.3",
+    "oxlint": "latest",
+    "oxlint-tsgolint": "latest",
+    "typescript": "latest",
+    "wrangler": "latest"
+  }
+}

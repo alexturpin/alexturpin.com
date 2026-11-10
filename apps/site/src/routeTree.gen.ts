@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DotwellKnownSiteDotstandardDotpublicationRouteImport } from './routes/[.]well-known/site[.]standard[.]publication'
 import { Route as WritingIndexRouteImport } from './routes/writing/index'
 import { Route as WritingSlugRouteImport } from './routes/writing/$slug'
 
@@ -18,6 +19,12 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DotwellKnownSiteDotstandardDotpublicationRoute =
+  DotwellKnownSiteDotstandardDotpublicationRouteImport.update({
+    id: '/.well-known/site.standard.publication',
+    path: '/.well-known/site.standard.publication',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const WritingIndexRoute = WritingIndexRouteImport.update({
   id: '/writing/',
   path: '/writing/',
@@ -31,30 +38,47 @@ const WritingSlugRoute = WritingSlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/.well-known/site.standard.publication': typeof DotwellKnownSiteDotstandardDotpublicationRoute
   '/writing/$slug': typeof WritingSlugRoute
   '/writing/': typeof WritingIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/.well-known/site.standard.publication': typeof DotwellKnownSiteDotstandardDotpublicationRoute
   '/writing/$slug': typeof WritingSlugRoute
   '/writing': typeof WritingIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/.well-known/site.standard.publication': typeof DotwellKnownSiteDotstandardDotpublicationRoute
   '/writing/$slug': typeof WritingSlugRoute
   '/writing/': typeof WritingIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/writing/$slug' | '/writing/'
+  fullPaths:
+    | '/'
+    | '/.well-known/site.standard.publication'
+    | '/writing/$slug'
+    | '/writing/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/writing/$slug' | '/writing'
-  id: '__root__' | '/' | '/writing/$slug' | '/writing/'
+  to:
+    | '/'
+    | '/.well-known/site.standard.publication'
+    | '/writing/$slug'
+    | '/writing'
+  id:
+    | '__root__'
+    | '/'
+    | '/.well-known/site.standard.publication'
+    | '/writing/$slug'
+    | '/writing/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DotwellKnownSiteDotstandardDotpublicationRoute: typeof DotwellKnownSiteDotstandardDotpublicationRoute
   WritingSlugRoute: typeof WritingSlugRoute
   WritingIndexRoute: typeof WritingIndexRoute
 }
@@ -66,6 +90,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/site.standard.publication': {
+      id: '/.well-known/site.standard.publication'
+      path: '/.well-known/site.standard.publication'
+      fullPath: '/.well-known/site.standard.publication'
+      preLoaderRoute: typeof DotwellKnownSiteDotstandardDotpublicationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/writing/': {
@@ -87,6 +118,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DotwellKnownSiteDotstandardDotpublicationRoute:
+    DotwellKnownSiteDotstandardDotpublicationRoute,
   WritingSlugRoute: WritingSlugRoute,
   WritingIndexRoute: WritingIndexRoute,
 }

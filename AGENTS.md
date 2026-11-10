@@ -102,6 +102,11 @@ tanstackIntent:
 
 # alexturpin.com
 
+- This pnpm workspace contains `apps/site` (TanStack website) and `apps/pds`
+  (Cirrus). Run app-specific CLI commands from that app directory.
+- Keep their deployments, secrets, and Wrangler bindings independent.
+  PDS setup is local-only until deployment and migration are explicitly authorized.
+
 - Build with TanStack Start and Router, React, and plain CSS on Cloudflare Workers.
   Prerender static content; use the Worker runtime for SSR and server functions
   when needed. TanStack Query is available for data fetching. Ask before adding
